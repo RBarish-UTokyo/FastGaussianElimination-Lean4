@@ -1,0 +1,215 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+# Submission "Fast Gaussian elimination": Challenge FastGEChallenge.lean, Solution FastGESolution.lean,
+# comparator configuration comparator.json (paths relative to the repository root).
+version: "v0.4"
+
+project:
+  name: "Strassen's algorithm, inversion in O(M(n)) and nested dissection with fast matrix multiplication, in Lean 4"
+  description: >-
+    A Lean 4 and Mathlib formalization, in the arithmetic cost model, of fast
+    matrix multiplication and its use in Gaussian elimination. Algorithms are
+    written in a writer monad that charges one unit for every addition,
+    subtraction, negation, multiplication and inversion performed through its
+    primitives; costs are statements about these explicit algorithms, whose
+    definitions are part of the statements. A matrix multiplication algorithm is
+    a counted procedure together with proofs that it computes the product and
+    performs at most M(n) operations on n x n matrices, M monotone. Six theorems
+    are compared: (1) over every ring, Strassen's algorithm on matrices of size
+    2^k computes the product with exactly 7^k multiplications and 6(7^k - 4^k)
+    additive operations; (2) 2 < log2(7) < 3, and over every ring Strassen's
+    algorithm padded with zeros to the next power of two is a multiplication
+    algorithm with at most 49 n^(log2 7) operations for n >= 1, whose bound
+    satisfies 4 M(2^k) <= M(2^(k+1)) and 1 <= M(1); (3) over a field, for every
+    multiplication algorithm whose bound satisfies these two conditions, block
+    inversion of diag(A, 1) padded to size 2^ceil(log2 n) returns the inverse
+    and the determinant of an n x n matrix A whose leading principal minors are
+    all nonzero, and performs fewer than 5 M(2^ceil(log2 n)) operations (at most
+    5 C 2^omega n^omega when n >= 1, omega >= 0 and M(m) <= C m^omega for all m
+    >= 1); (4)-(6) for every field K, every multiplication algorithm over K with
+    M(m) <= C m^omega for m >= 1, omega > 2, satisfying the two conditions
+    above, and every plane graph (respectively the square of a plane graph of
+    maximum degree at most D) on n vertices, there is a separator tree covering
+    all vertices such that block elimination along it computes the determinant
+    of every matrix over K whose off-diagonal nonzero entries are edges of that
+    graph, provided the elimination meets only invertible blocks (theorem (6):
+    no such hypothesis for positive definite matrices, on squares of plane
+    graphs, over a field with a partial order and a star structure satisfying
+    IsOrderedRing, PosMulReflectLT and StarRing, such as the real numbers), with
+    at most (5 C 2^omega + 2C + 2)(2T + 1)^omega / (1 - (2/3)^(omega/2 - 1))
+    n^(omega/2) operations, T = 50000, respectively T = 40 (1062 (D + 1)^2 + 1).
+    Plane graphs are rotation systems of connected Mathlib simple graphs
+    satisfying Euler's formula, so they have at least one edge (faces are cycles
+    of darts, and the one-vertex graph has none). The proofs use only the axioms
+    propext, Classical.choice and Quot.sound.
+  authors:
+    - "Robert D. Barish"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Robert D. Barish"
+
+classification:
+  arxiv: [cs.DS, math.NA]
+  msc2020: [68Q25, 68W40, 65F05, 65F50, 15A15, 05C10]
+
+sources:
+  - title: "Gaussian elimination is not optimal"
+    authors:
+      - "V. Strassen"
+    type: paper
+    location: "Numerische Mathematik 13 (1969), 354-356"
+    relationship: formalizes
+    note: >-
+      Strassen's seven-multiplication scheme for 2 x 2 block matrices and its
+      recursive use. Formalized as FastGE.strassen_count (exact operation count)
+      and FastGE.strassen_exponent (exponent log2 7 with zero padding).
+      Strassen's block inversion and determinant for matrices with nonzero
+      leading principal minors are FastGE.inverse_determinant.
+  - title: "Triangular factorization and inversion by fast matrix multiplication"
+    authors:
+      - "J. R. Bunch"
+      - "J. E. Hopcroft"
+    type: paper
+    location: "Mathematics of Computation 28 (1974), 231-236"
+    relationship: adapts
+    note: >-
+      The bound O(M(n)) for inversion and the determinant in terms of an
+      arbitrary multiplication algorithm. Formalized as
+      FastGE.inverse_determinant for matrices with nonzero leading principal
+      minors (block inversion of diag(A, 1) padded to a power of two), the
+      setting of Strassen's 1969 inversion; the article's pivoting (LUP
+      decomposition) for general invertible matrices is not formalized.
+  - title: "The Design and Analysis of Computer Algorithms"
+    authors:
+      - "A. V. Aho"
+      - "J. E. Hopcroft"
+      - "J. D. Ullman"
+    type: book
+    location: "Addison-Wesley, Reading (1974), Chapter 6"
+    relationship: background
+    note: "The reduction of inversion and determinants to matrix multiplication."
+  - title: "Generalized nested dissection"
+    authors:
+      - "R. J. Lipton"
+      - "D. J. Rose"
+      - "R. E. Tarjan"
+    type: paper
+    location: "SIAM Journal on Numerical Analysis 16 (1979), 346-358"
+    relationship: adapts
+    note: >-
+      Separator trees with boundary bounds and elimination along them; with fast
+      matrix multiplication for the dense blocks, the cost O(n^(omega/2)).
+      Formalized as FastGE.planar_fast_determinant,
+      FastGE.square_fast_determinant and FastGE.square_fast_determinant_posDef.
+  - title: "Fast and efficient parallel solution of sparse linear systems"
+    authors:
+      - "V. Pan"
+      - "J. Reif"
+    type: paper
+    location: "SIAM Journal on Computing 22 (1993), 1227-1250"
+    relationship: background
+    note: "Block elimination along separator trees with fast matrix multiplication."
+
+related_formalizations: []
+
+status:
+  scope: >-
+    Proved: the six theorems stated in FastGEChallenge.lean
+    (FastGE.strassen_count, strassen_exponent, inverse_determinant,
+    planar_fast_determinant, square_fast_determinant,
+    square_fast_determinant_posDef), proved in FastGESolution.lean (from
+    FastGE/Main.lean) and compared by lake comparator with
+    comparator.json. The library FastGE of this repository also proves
+    schoolbook multiplication in 2 n^3 operations (FastGE/Naive.lean) the
+    Schur-complement calculus used by block elimination (FastGE/Frontal.lean),
+    and that block elimination along any separator tree meets only invertible
+    blocks when all principal minors are nonzero
+    (FastGE.FastDissection.allNodes_nodeRegular_of_forall). Not formalized: a
+    compilation of the counted algorithms to a machine model; matching
+    algorithms built on fast elimination.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: [propext, Classical.choice, Quot.sound]
+
+automation:
+  methods:
+    - method: agent
+      models: ["claude-opus-5-5"]
+      framework: "claude.ai"
+      tool_setup: >-
+        Claude Opus 5.5 (Anthropic) was used, as agents under the direction of
+        the author, for the Lean formalization and the documentation. The author
+        set the task, the target statements and the requirements. Tools: Lean
+        v4.35.0-rc2 and Lake, Mathlib, the toolchain's lake comparator and
+        independent kernels.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "not tracked"
+        hardware: "cloud container"
+      prompting_notes: "n/a"
+  spend_usd: "not tracked"
+
+fidelity:
+  divergences: >-
+    (1) Costs are counted operations in the arithmetic model, not machine steps:
+    the algorithms are written in a writer monad and the count is the number of
+    ring operations performed through its charged primitives (an inversion
+    counts as one multiplication; moving, copying, padding and reindexing data
+    is free). The statements are about the explicit algorithms defined in
+    FastGE/Spec.lean, whose definitions are part of the statement. (2)
+    Algorithms that use matrix multiplication take a bundled multiplication
+    algorithm (a counted procedure with proofs of correctness and of an
+    operation bound M) as a parameter, and their counts include the counts of
+    its calls; the bounds are in terms of M, or of an exponent omega and
+    constant C. (3) Inversion requires nonzero leading principal minors; block
+    elimination along the separator tree requires the regularity hypothesis
+    NodeRegular, which holds when all principal minors are nonzero, in
+    particular for positive definite matrices (proved in the library,
+    FastGE.FastDissection.allNodes_nodeRegular_of_forall, and used for
+    FastGE.square_fast_determinant_posDef). (4) Plane graphs are rotation
+    systems of connected simple graphs satisfying Euler's formula, so the three
+    nested-dissection statements are about connected graphs with at least one
+    edge (the one-vertex graph has no darts, hence no faces, and is not plane
+    here). Nested dissection applies to all planar graphs; the disconnected
+    case, which follows by joining the components with extra edges, is not
+    formalized. (5) The separator-tree constants (50000 for plane graphs, 40
+    (1062 (D + 1)^2 + 1) for squares of graphs of maximum degree D) are not
+    optimized.
+
+review:
+  status: "unreviewed"
+  reviewers: []
+  notes: >-
+    No claims beyond the verification report for the submitted commit. The
+    proofs have not been reviewed by a person.
+
+alignment:
+  namespace: "FastGE"
+  statements:
+    - source: "Strassen 1969: 7^k multiplications for matrices of size 2^k"
+      lean: "FastGE.strassen_count"
+      module: "FastGESolution"
+      status: proved
+    - source: "Strassen 1969: matrix multiplication in O(n^(log2 7)) operations"
+      lean: "FastGE.strassen_exponent"
+      module: "FastGESolution"
+      status: proved
+    - source: "Strassen 1969; Bunch-Hopcroft 1974: inversion and the determinant in O(M(n)) operations, nonzero leading principal minors"
+      lean: "FastGE.inverse_determinant"
+      module: "FastGESolution"
+      status: proved
+    - source: "Lipton-Rose-Tarjan 1979 with fast multiplication: determinants with planar pattern in O(n^(omega/2))"
+      lean: "FastGE.planar_fast_determinant"
+      module: "FastGESolution"
+      status: proved
+    - source: "The same for squares of planar graphs of bounded degree"
+      lean: "FastGE.square_fast_determinant"
+      module: "FastGESolution"
+      status: proved
+    - source: "The same for positive definite matrices on squares of planar graphs of bounded degree"
+      lean: "FastGE.square_fast_determinant_posDef"
+      module: "FastGESolution"
+      status: proved
+
+acknowledgements: >-
+  Mathlib and the Lean community; the Lean toolchain's lake comparator and
+  independent kernels.

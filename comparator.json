@@ -1,0 +1,19 @@
+{
+  "challenge_module": "FastGEChallenge",
+  "solution_module": "FastGESolution",
+  "theorem_names": [
+    "FastGE.strassen_count",
+    "FastGE.strassen_exponent",
+    "FastGE.inverse_determinant",
+    "FastGE.planar_fast_determinant",
+    "FastGE.square_fast_determinant",
+    "FastGE.square_fast_determinant_posDef"
+  ],
+  "definition_names": [],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": true
+}
